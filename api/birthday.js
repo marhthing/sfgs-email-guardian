@@ -66,6 +66,13 @@ export default async function handler(req, res) {
           created_at: new Date().toISOString(),
           student_id: student.id // use student_id, not students
         });
+        if (!insertError) {
+          // Log to birthday_emails_sent to prevent duplicate for this student/parent today
+          await supabase.from('birthday_emails_sent').insert({
+            student_id: student.id,
+            sent_date: today.toISOString().slice(0, 10)
+          });
+        }
         if (insertError) {
           console.error('Failed to insert birthday email:', insertError);
           continue;

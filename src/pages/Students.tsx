@@ -109,7 +109,14 @@ export default function Students() {
       }
     } else {
       // Add
-      const { error } = await supabase.from("students").insert(form);
+      // Only send required fields for insert
+      const { error } = await supabase.from("students").insert({
+        student_name: form.student_name!,
+        matric_number: form.matric_number!,
+        date_of_birth: form.date_of_birth!,
+        parent_email_1: form.parent_email_1 || null,
+        parent_email_2: form.parent_email_2 || null,
+      });
       if (error) {
         toast({ title: "Failed to add student", variant: "destructive" });
       } else {
@@ -146,7 +153,7 @@ export default function Students() {
     setEmailForm({
       to,
       from: import.meta.env.VITE_SMTP_USER || "",
-      subject: `Message for ${student.student_name}`,
+      subject: `Message for ${student.student_name}` || "No subject",
       message: "",
       attachments: [],
     });
@@ -210,16 +217,28 @@ export default function Students() {
         : [];
       let allSuccess = true;
       for (const recipient of recipients) {
-        const { error } = await supabase.from("email_queue").insert({
+        // Always explicitly set subject and message
+        const subject =
+          emailForm.subject && emailForm.subject.trim() !== ""
+            ? emailForm.subject
+            : "No subject";
+        const message =
+          emailForm.message && emailForm.message.trim() !== ""
+            ? emailForm.message
+            : "(No message)";
+        const insertObj = {
           student_id: emailingStudent?.id || null,
           matric_number: emailingStudent?.matric_number || "",
           recipient_email: recipient,
-          status: "pending",
+          status: "pending" as const,
           sent_at: null,
-          email_type: "pdf",
+          email_type: "pdf" as const,
+          subject,
+          message,
           attachments:
             attachmentPaths.length > 0 ? JSON.stringify(attachmentPaths) : null,
-        });
+        };
+        const { error } = await supabase.from("email_queue").insert(insertObj);
         if (error) allSuccess = false;
       }
       if (allSuccess) {

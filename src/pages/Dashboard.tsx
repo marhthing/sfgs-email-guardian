@@ -59,11 +59,10 @@ export default function Dashboard() {
             .from("email_queue")
             .select("id", { count: "exact", head: true })
             .eq("status", "failed"),
-          supabase
-            .from("system_logs")
-            .select("created_at")
-            .eq("type", "cron")
-            .order("created_at", { ascending: false })
+          (supabase as any)
+            .from("cron_log")
+            .select("executed_at")
+            .order("executed_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
         ]);
@@ -73,7 +72,7 @@ export default function Dashboard() {
           emailsSentToday: sentTodayResult.count || 0,
           emailsPending: pendingResult.count || 0,
           emailsFailed: failedResult.count || 0,
-          lastCronRun: lastCronResult.data?.created_at || null,
+          lastCronRun: lastCronResult.data?.executed_at || null,
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
