@@ -31,42 +31,47 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch students', details: error.message || error });
     }
 
-    // Filter students whose birthday matches today (assuming birthday is YYYY-MM-DD)
+    // Filter students whose birthday matches today (using date_of_birth column)
     const birthdayStudents = students.filter(s => {
-      if (!s.birthday) return false;
-      const [y, m, d] = s.birthday.split('-').map(Number);
-      return m === month && d === day;
+      if (!s.date_of_birth) return false;
+      const bday = new Date(s.date_of_birth);
+      return bday.getDate() === today.getDate() && bday.getMonth() === today.getMonth();
     });
 
     // Queue birthday emails for each student
     let queued = 0;
     for (const student of birthdayStudents) {
-      // Check if already queued today
-      const { data: existing, error: existingError } = await supabase
-        .from('email_queue')
-        .select('id')
-        .eq('matric_number', student.matric_number)
-        .eq('email_type', 'birthday')
-        .gte('created_at', today.toISOString().split('T')[0] + 'T00:00:00');
-      if (existingError) {
-        console.error('Failed to check existing birthday emails:', existingError);
-        continue;
-      }
-      if (existing && existing.length > 0) continue;
+      // Use parent_email_1 and parent_email_2 if present
+      const parentEmails = [student.parent_email_1, student.parent_email_2].filter(Boolean);
+      for (const parentEmail of parentEmails) {
+        // Check if already queued today for this parent
+        const { data: existing, error: existingError } = await supabase
+          .from('email_queue')
+          .select('id')
+          .eq('matric_number', student.matric_number)
+          .eq('email_type', 'birthday')
+          .eq('recipient_email', parentEmail)
+          .gte('created_at', today.toISOString().split('T')[0] + 'T00:00:00');
+        if (existingError) {
+          console.error('Failed to check existing birthday emails:', existingError);
+          continue;
+        }
+        if (existing && existing.length > 0) continue;
 
-      const { error: insertError } = await supabase.from('email_queue').insert({
-        matric_number: student.matric_number,
-        recipient_email: student.parent_email,
-        email_type: 'birthday',
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        students: student.id
-      });
-      if (insertError) {
-        console.error('Failed to insert birthday email:', insertError);
-        continue;
+        const { error: insertError } = await supabase.from('email_queue').insert({
+          matric_number: student.matric_number,
+          recipient_email: parentEmail,
+          email_type: 'birthday',
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          student_id: student.id // use student_id, not students
+        });
+        if (insertError) {
+          console.error('Failed to insert birthday email:', insertError);
+          continue;
+        }
+        queued++;
       }
-      queued++;
     }
 
     res.status(200).json({ message: `Queued ${queued} birthday emails.` });
