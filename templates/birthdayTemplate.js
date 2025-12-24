@@ -16,30 +16,7 @@ export default function birthdayTemplate({ studentName }) {
               </tr>
               <tr>
                 <td style="background: linear-gradient(135deg, #4a0f3f 0%, #764ba2 100%); padding: 40px 40px 35px; text-align: center; position: relative;">
-                  <div style="width: 100%; display: flex; justify-content: center; gap: 12px;">
-                    <!-- SVG Balloons -->
-                    <svg width='32' height='80' viewBox='0 0 32 80' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='16' cy='20' rx='14' ry='18' fill='#ff5a5f'/>
-                      <path d='M16 38 Q18 50 12 60 Q8 68 16 80' stroke='#b23b3b' stroke-width='2' fill='none'/>
-                    </svg>
-                    <svg width='28' height='70' viewBox='0 0 28 70' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='14' cy='16' rx='12' ry='14' fill='#fbbf24'/>
-                      <path d='M14 30 Q10 45 18 60 Q22 66 14 70' stroke='#b28b1e' stroke-width='2' fill='none'/>
-                    </svg>
-                    <svg width='24' height='60' viewBox='0 0 24 60' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='12' cy='12' rx='10' ry='10' fill='#34d399'/>
-                      <path d='M12 22 Q16 35 8 50 Q4 56 12 60' stroke='#1e7c4a' stroke-width='2' fill='none'/>
-                    </svg>
-                    <svg width='28' height='70' viewBox='0 0 28 70' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='14' cy='16' rx='12' ry='14' fill='#6366f1'/>
-                      <path d='M14 30 Q18 45 10 60 Q6 66 14 70' stroke='#3730a3' stroke-width='2' fill='none'/>
-                    </svg>
-                    <svg width='32' height='80' viewBox='0 0 32 80' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='16' cy='20' rx='14' ry='18' fill='#f472b6'/>
-                      <path d='M16 38 Q12 50 20 60 Q24 68 16 80' stroke='#a21caf' stroke-width='2' fill='none'/>
-                    </svg>
-                  </div>
-                  <h1 style="margin: 24px 0 0 0; color: #ffffff; font-size: 32px; font-weight: normal; letter-spacing: 1px;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: normal; letter-spacing: 1px;">
                     Happy Birthday
                   </h1>
                 </td>
@@ -71,28 +48,11 @@ export default function birthdayTemplate({ studentName }) {
               </tr>
               <tr>
                 <td style="padding: 0 40px 20px; text-align: center;">
-                  <div style="width: 100%; display: flex; justify-content: center; gap: 8px;">
-                    <svg width='20' height='40' viewBox='0 0 20 40' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='10' cy='10' rx='8' ry='8' fill='#ff5a5f'/>
-                      <path d='M10 18 Q12 28 6 40' stroke='#b23b3b' stroke-width='1.5' fill='none'/>
-                    </svg>
-                    <svg width='18' height='36' viewBox='0 0 18 36' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='9' cy='8' rx='7' ry='7' fill='#fbbf24'/>
-                      <path d='M9 15 Q7 25 12 36' stroke='#b28b1e' stroke-width='1.5' fill='none'/>
-                    </svg>
-                    <svg width='16' height='32' viewBox='0 0 16 32' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='8' cy='7' rx='6' ry='6' fill='#34d399'/>
-                      <path d='M8 13 Q10 22 4 32' stroke='#1e7c4a' stroke-width='1.5' fill='none'/>
-                    </svg>
-                    <svg width='18' height='36' viewBox='0 0 18 36' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='9' cy='8' rx='7' ry='7' fill='#6366f1'/>
-                      <path d='M9 15 Q11 25 6 36' stroke='#3730a3' stroke-width='1.5' fill='none'/>
-                    </svg>
-                    <svg width='20' height='40' viewBox='0 0 20 40' fill='none' xmlns='http://www.w3.org/2000/svg' style='display:inline-block;'>
-                      <ellipse cx='10' cy='10' rx='8' ry='8' fill='#f472b6'/>
-                      <path d='M10 18 Q8 28 14 40' stroke='#a21caf' stroke-width='1.5' fill='none'/>
-                    </svg>
-                  </div>
+                  <span style="font-size: 24px; margin: 0 8px; color: #4a0f3f;">🎈</span>
+                  <span style="font-size: 20px; margin: 0 8px; color: #4a0f3f;">🎈</span>
+                  <span style="font-size: 26px; margin: 0 8px; color: #4a0f3f;">🎈</span>
+                  <span style="font-size: 22px; margin: 0 8px; color: #4a0f3f;">🎈</span>
+                  <span style="font-size: 24px; margin: 0 8px; color: #4a0f3f;">🎈</span>
                 </td>
               </tr>
               <tr>
