@@ -57,14 +57,18 @@ export default async function handler(req, res) {
           continue;
         }
         if (existing && existing.length > 0) continue;
-
+        // Compose personalized birthday message
+        const subject = `Happy Birthday from SFGS!`;
+        const message = require('../templates/birthdayTemplate.js').default({ studentName: student.student_name });
         const { error: insertError } = await supabase.from('email_queue').insert({
           matric_number: student.matric_number,
           recipient_email: parentEmail,
           email_type: 'birthday',
           status: 'pending',
           created_at: new Date().toISOString(),
-          student_id: student.id // use student_id, not students
+          student_id: student.id,
+          subject,
+          message
         });
         if (!insertError) {
           // Log to birthday_emails_sent to prevent duplicate for this student/parent today

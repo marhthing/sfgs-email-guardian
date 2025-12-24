@@ -70,7 +70,7 @@ export default async function handler(req, res) {
   // Get the next pending email, prioritizing those with prioritized_at set
   const { data: pending } = await supabase
     .from('email_queue')
-    .select('*')
+    .select('*, students:student_id(student_name)')
     .eq('status', 'pending')
     .order('prioritized_at', { ascending: false, nullsLast: true })
     .order('queued_at', { ascending: true })
