@@ -168,6 +168,7 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          admin_password: string
           daily_email_limit: number
           email_interval_minutes: number
           id: string
@@ -175,6 +176,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_password?: string
           daily_email_limit?: number
           email_interval_minutes?: number
           id?: string
@@ -182,6 +184,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_password?: string
           daily_email_limit?: number
           email_interval_minutes?: number
           id?: string
