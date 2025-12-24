@@ -37,6 +37,10 @@ export default async function handler(req, res) {
 
   if (!canSend) {
     const minutesLeft = Math.ceil(intervalMinutes - ((now.getTime() - new Date(lastSent.sent_at).getTime()) / 60000));
+    await supabase.from('cron_log').insert({
+      status: 'rate_limited',
+      message: `Must wait ${minutesLeft} minute(s) before the next email can be sent.`
+    });
     res.status(200).json({ success: false, message: `Must wait ${minutesLeft} minute(s) before the next email can be sent.` });
     return;
   }
@@ -52,6 +56,10 @@ export default async function handler(req, res) {
     .maybeSingle();
 
   if (!pending) {
+    await supabase.from('cron_log').insert({
+      status: 'no_pending',
+      message: 'No pending emails to send.'
+    });
     res.status(200).json({ message: 'No pending emails to send.' });
     return;
   }
@@ -91,9 +99,19 @@ export default async function handler(req, res) {
         : [],
     });
     await supabase.from('email_queue').update({ status: 'sent', sent_at: now.toISOString() }).eq('id', pending.id);
+    await supabase.from('cron_log').insert({
+      status: 'success',
+      message: `Email sent to ${pending.recipient_email}`,
+      email_id: pending.id
+    });
     res.status(200).json({ success: true });
   } catch (err) {
     await supabase.from('email_queue').update({ status: 'failed', error_message: err.message }).eq('id', pending.id);
+    await supabase.from('cron_log').insert({
+      status: 'error',
+      message: err.message,
+      email_id: pending.id
+    });
     res.status(500).json({ error: err.message });
   }
 }
