@@ -24,8 +24,7 @@ export default async function handler(req, res) {
     // Find students with birthday today
     const { data: students, error } = await supabase
       .from('students')
-      .select('*')
-      .filter('birthday', 'neq', null);
+      .select('*'); // Removed .filter('birthday', 'neq', null) to avoid column error
 
     if (error) {
       console.error('Failed to fetch students:', error);
