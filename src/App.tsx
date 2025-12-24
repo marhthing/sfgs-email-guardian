@@ -13,6 +13,7 @@ import SentHistory from "./pages/SentHistory";
 import FailedEmails from "./pages/FailedEmails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Students from "./pages/Students";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/upload" element={<Upload />} />
             <Route path="/files" element={<Files />} />
             <Route path="/queue" element={<Queue />} />
+            <Route path="/students" element={<Students />} />
             <Route path="/history/sent" element={<SentHistory />} />
             <Route path="/history/failed" element={<FailedEmails />} />
             <Route path="/settings" element={<Settings />} />

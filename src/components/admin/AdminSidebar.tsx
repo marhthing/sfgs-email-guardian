@@ -1,13 +1,13 @@
-import { 
-  LayoutDashboard, 
-  Upload, 
-  FileText, 
-  Mail, 
-  CheckCircle, 
-  XCircle, 
+import {
+  LayoutDashboard,
+  Upload,
+  FileText,
+  Mail,
+  CheckCircle,
+  XCircle,
   Settings,
   LogOut,
-  GraduationCap
+  GraduationCap,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +30,7 @@ const mainNavItems = [
   { title: "Upload PDFs", url: "/upload", icon: Upload },
   { title: "Uploaded Files", url: "/files", icon: FileText },
   { title: "Email Queue", url: "/queue", icon: Mail },
+  { title: "Students", url: "/students", icon: GraduationCap }, // Add Students page
 ];
 
 const historyNavItems = [
@@ -52,7 +53,9 @@ export function AdminSidebar() {
             <GraduationCap className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-sidebar-foreground">SFGS</span>
+            <span className="text-sm font-semibold text-sidebar-foreground">
+              SFGS
+            </span>
             <span className="text-xs text-sidebar-muted">Admin Portal</span>
           </div>
         </div>

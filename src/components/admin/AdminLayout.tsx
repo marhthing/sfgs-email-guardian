@@ -25,20 +25,29 @@ function LoadingState() {
   );
 }
 
-export function AdminLayout({ children, title, description }: AdminLayoutProps) {
+export function AdminLayout({
+  children,
+  title,
+  description,
+}: AdminLayoutProps) {
   const { user, isAdmin, isLoading } = useAuth();
+
+  // Only render logs when state actually changes (not on every render)
+  // Remove for production
+  // useEffect(() => {
+  //   console.log("AdminLayout:", { user, isAdmin, isLoading });
+  // }, [user, isAdmin, isLoading]);
 
   if (isLoading) {
     return <LoadingState />;
   }
 
+  // Only redirect after loading is complete and user is confirmed
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
   if (!isAdmin) {
-    // If user exists but no admin role, redirect to auth page
-    // The auth flow will handle setting up admin role properly
     return <Navigate to="/auth" replace />;
   }
 
@@ -56,9 +65,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
               )}
             </div>
           </header>
-          <div className="flex-1 p-6 overflow-auto">
-            {children}
-          </div>
+          <div className="flex-1 p-6 overflow-auto">{children}</div>
         </main>
       </div>
     </SidebarProvider>

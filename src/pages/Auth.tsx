@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap, Loader2, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +25,13 @@ export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Use effect to navigate after login to avoid render loop
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -28,12 +41,13 @@ export default function Auth() {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    // Prevent rendering anything while redirecting
+    return null;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!password.trim()) {
       toast({
         title: "Error",
@@ -74,11 +88,12 @@ export default function Auth() {
       if (signInError) {
         // Account doesn't exist, create it
         if (signInError.message.includes("Invalid login credentials")) {
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: ADMIN_EMAIL,
-            password: correctPassword,
-            options: { emailRedirectTo: `${window.location.origin}/` },
-          });
+          const { data: signUpData, error: signUpError } =
+            await supabase.auth.signUp({
+              email: ADMIN_EMAIL,
+              password: correctPassword,
+              options: { emailRedirectTo: `${window.location.origin}/` },
+            });
 
           if (signUpError) {
             toast({
@@ -94,7 +109,10 @@ export default function Auth() {
           if (signUpData.user) {
             await supabase
               .from("user_roles")
-              .upsert({ user_id: signUpData.user.id, role: "admin" }, { onConflict: "user_id,role" });
+              .upsert(
+                { user_id: signUpData.user.id, role: "admin" },
+                { onConflict: "user_id,role" }
+              );
           }
 
           // Sign in with the new account
@@ -117,7 +135,7 @@ export default function Auth() {
         title: "Welcome!",
         description: "Login successful.",
       });
-      navigate("/dashboard");
+      // Removed navigate("/dashboard") here to avoid navigation loop
     } catch (err) {
       toast({
         title: "Error",
@@ -136,7 +154,9 @@ export default function Auth() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary">
             <GraduationCap className="h-7 w-7 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">SFGS Admin Portal</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            SFGS Admin Portal
+          </CardTitle>
           <CardDescription>
             Sure Foundation Group of School - Email Automation System
           </CardDescription>

@@ -25,7 +25,7 @@ export type Database = {
           created_at?: string
           id?: string
           sent_date?: string
-          student_id: string
+          student_id?: string
         }
         Update: {
           created_at?: string
@@ -73,6 +73,10 @@ export type Database = {
           sent_at: string | null
           status: Database["public"]["Enums"]["email_status"]
           student_id: string
+          subject: string | null
+          message: string | null
+          attachments: Json | null
+          queued_at: string | null
         }
         Insert: {
           created_at?: string
@@ -85,6 +89,10 @@ export type Database = {
           sent_at?: string | null
           status?: Database["public"]["Enums"]["email_status"]
           student_id: string
+          subject?: string | null
+          message?: string | null
+          attachments?: Json | null
+          queued_at?: string | null
         }
         Update: {
           created_at?: string
@@ -97,6 +105,10 @@ export type Database = {
           sent_at?: string | null
           status?: Database["public"]["Enums"]["email_status"]
           student_id?: string
+          subject?: string | null
+          message?: string | null
+          attachments?: Json | null
+          queued_at?: string | null
         }
         Relationships: [
           {
