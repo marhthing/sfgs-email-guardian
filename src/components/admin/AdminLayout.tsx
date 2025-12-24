@@ -37,19 +37,9 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
   }
 
   if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center p-8">
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Access Denied</h1>
-          <p className="text-muted-foreground mb-4">
-            You don't have admin privileges to access this portal.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Contact system administrator if you believe this is an error.
-          </p>
-        </div>
-      </div>
-    );
+    // If user exists but no admin role, redirect to auth page
+    // The auth flow will handle setting up admin role properly
+    return <Navigate to="/auth" replace />;
   }
 
   return (

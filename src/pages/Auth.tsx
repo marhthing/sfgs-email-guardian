@@ -89,9 +89,16 @@ export default function Auth() {
             return;
           }
           
+          // Wait a moment for the user to be created, then sign in
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Now sign in with the newly created account
-          const { error: retrySignInError } = await signIn(ADMIN_EMAIL, password);
-          if (retrySignInError) {
+          const { data: signInData, error: retrySignInError } = await supabase.auth.signInWithPassword({
+            email: ADMIN_EMAIL,
+            password: password,
+          });
+          
+          if (retrySignInError || !signInData.user) {
             toast({
               title: "Error",
               description: "Account created. Please try logging in again.",
@@ -100,6 +107,12 @@ export default function Auth() {
             setIsLoading(false);
             return;
           }
+          
+          // Add admin role for the newly created user
+          await supabase
+            .from("user_roles")
+            .upsert({ user_id: signInData.user.id, role: "admin" }, { onConflict: "user_id,role" });
+            
         } else {
           toast({
             title: "Error",
