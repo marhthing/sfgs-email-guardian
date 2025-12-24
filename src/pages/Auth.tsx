@@ -5,18 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, Loader2 } from "lucide-react";
-import { z } from "zod";
+import { GraduationCap, Loader2, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const authSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const ADMIN_EMAIL = "admin@sfgs.local";
 
 export default function Auth() {
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, user, isLoading: authLoading } = useAuth();
@@ -35,12 +30,13 @@ export default function Auth() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handleAuth = async (action: "signin" | "signup") => {
-    const validation = authSchema.safeParse({ email, password });
-    if (!validation.success) {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!password.trim()) {
       toast({
-        title: "Validation Error",
-        description: validation.error.errors[0].message,
+        title: "Error",
+        description: "Please enter the admin password.",
         variant: "destructive",
       });
       return;
@@ -48,32 +44,74 @@ export default function Auth() {
 
     setIsLoading(true);
     try {
-      const { error } = action === "signin" 
-        ? await signIn(email, password)
-        : await signUp(email, password);
+      // First, verify password against database
+      const { data: settings, error: settingsError } = await supabase
+        .from("system_settings")
+        .select("admin_password")
+        .single();
 
-      if (error) {
-        let message = error.message;
-        if (message.includes("Invalid login credentials")) {
-          message = "Invalid email or password. Please try again.";
-        } else if (message.includes("User already registered")) {
-          message = "This email is already registered. Please sign in instead.";
+      if (settingsError || !settings) {
+        // If no settings exist, create default and check against default password
+        if (password !== "sfgsadmin") {
+          toast({
+            title: "Invalid Password",
+            description: "The password you entered is incorrect.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
         }
+      } else if (settings.admin_password !== password) {
         toast({
-          title: "Authentication Error",
-          description: message,
+          title: "Invalid Password",
+          description: "The password you entered is incorrect.",
           variant: "destructive",
         });
-      } else {
-        if (action === "signup") {
-          toast({
-            title: "Account Created",
-            description: "Your account has been created. Please sign in.",
-          });
+        setIsLoading(false);
+        return;
+      }
+
+      // Password is correct, now sign in or create the Supabase auth user
+      const { error: signInError } = await signIn(ADMIN_EMAIL, password);
+      
+      if (signInError) {
+        // User might not exist yet, try to create it
+        if (signInError.message.includes("Invalid login credentials")) {
+          const { error: signUpError } = await signUp(ADMIN_EMAIL, password);
+          
+          if (signUpError) {
+            toast({
+              title: "Error",
+              description: "Failed to initialize admin account. Please try again.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
+          
+          // Now sign in with the newly created account
+          const { error: retrySignInError } = await signIn(ADMIN_EMAIL, password);
+          if (retrySignInError) {
+            toast({
+              title: "Error",
+              description: "Account created. Please try logging in again.",
+              variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+          }
         } else {
-          navigate("/dashboard");
+          toast({
+            title: "Error",
+            description: signInError.message,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
         }
       }
+
+      navigate("/dashboard");
     } catch (err) {
       toast({
         title: "Error",
@@ -98,86 +136,33 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={(e) => { e.preventDefault(); handleAuth("signin"); }} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="admin@sfgs.edu"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing In...
-                    </>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={(e) => { e.preventDefault(); handleAuth("signup"); }} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="admin@sfgs.edu"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Create Account"
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Admin Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter admin password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
