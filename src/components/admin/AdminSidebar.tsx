@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   GraduationCap,
+  Cake,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,10 +28,11 @@ import { Button } from "@/components/ui/button";
 
 const mainNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Upload PDFs", url: "/upload", icon: Upload },
+  // { title: "Upload PDFs", url: "/upload", icon: Upload }, // Removed as per user request
   { title: "Uploaded Files", url: "/files", icon: FileText },
   { title: "Email Queue", url: "/queue", icon: Mail },
-  { title: "Students", url: "/students", icon: GraduationCap }, // Add Students page
+  { title: "Students", url: "/students", icon: GraduationCap },
+  { title: "Birthdays", url: "/birthdays", icon: Cake },
 ];
 
 const historyNavItems = [

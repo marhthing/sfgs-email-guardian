@@ -14,6 +14,7 @@ import FailedEmails from "./pages/FailedEmails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Students from "./pages/Students";
+import Birthday from "./pages/Birthday";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/files" element={<Files />} />
             <Route path="/queue" element={<Queue />} />
             <Route path="/students" element={<Students />} />
+            <Route path="/birthdays" element={<Birthday />} />
             <Route path="/history/sent" element={<SentHistory />} />
             <Route path="/history/failed" element={<FailedEmails />} />
             <Route path="/settings" element={<Settings />} />

@@ -168,7 +168,7 @@ export default function Students() {
 
   const handleSendEmail = async () => {
     setIsSending(true);
-    let attachmentUrls: string[] = [];
+    let attachmentPaths: string[] = [];
     // Upload attachments to Supabase Storage if any
     if (emailForm.attachments.length > 0) {
       for (const file of emailForm.attachments) {
@@ -184,31 +184,41 @@ export default function Students() {
           setIsSending(false);
           return;
         }
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from("pdfs")
-          .getPublicUrl(storagePath);
-        if (urlData?.publicUrl) {
-          attachmentUrls.push(urlData.publicUrl);
-        }
+        attachmentPaths.push(storagePath);
+        // Save file record in uploaded_files table
+        await supabase.from("uploaded_files").insert({
+          original_file_name: `${emailingStudent?.student_name}.${new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")}`,
+          matric_number_raw: emailingStudent?.matric_number || "",
+          matric_number_parsed: emailingStudent?.matric_number || "",
+          student_id: emailingStudent?.id || null,
+          status: "matched",
+          storage_path: storagePath,
+          uploaded_at: new Date().toISOString(),
+        });
       }
     }
     // Only queue the email, do not send immediately
     try {
       const now = new Date().toISOString();
       const recipients = emailForm.to
-        .split(",")
-        .map((e) => e.trim())
-        .filter(Boolean);
+        ? emailForm.to
+            .split(",")
+            .map((e) => e.trim())
+            .filter(Boolean)
+        : [];
       let allSuccess = true;
       for (const recipient of recipients) {
         const { error } = await supabase.from("email_queue").insert({
-          student_id: emailingStudent?.id || undefined,
+          student_id: emailingStudent?.id || null,
           matric_number: emailingStudent?.matric_number || "",
           recipient_email: recipient,
           status: "pending",
           sent_at: null,
           email_type: "pdf",
+          attachments:
+            attachmentPaths.length > 0 ? JSON.stringify(attachmentPaths) : null,
         });
         if (error) allSuccess = false;
       }

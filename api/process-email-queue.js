@@ -38,11 +38,12 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Get the next pending email
+  // Get the next pending email, prioritizing those with prioritized_at set
   const { data: pending } = await supabase
     .from('email_queue')
     .select('*')
     .eq('status', 'pending')
+    .order('prioritized_at', { ascending: false, nullsFirst: true })
     .order('queued_at', { ascending: true })
     .limit(1)
     .maybeSingle();
