@@ -81,9 +81,11 @@ export default async function handler(req, res) {
       text: message.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''),
       html: `<p>${message}</p>`,
       attachments: pending.attachments
-        ? JSON.parse(pending.attachments).map((url) => ({
-            path: url
-          }))
+        ? JSON.parse(pending.attachments).map((url) => {
+            // If the URL is a Supabase public URL, set a filename for the attachment
+            const filename = url.split('/').pop()?.split('?')[0] || 'attachment.pdf';
+            return { path: url, filename };
+          })
         : [],
     });
     await supabase.from('email_queue').update({ status: 'sent', sent_at: now.toISOString() }).eq('id', pending.id);
