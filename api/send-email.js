@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
   try {
     await transporter.sendMail({
-      from: process.env.VITE_SMTP_USER,
+      from: `"${process.env.VITE_SMTP_FROM_NAME}" <${process.env.VITE_SMTP_USER}>`,
       to,
       subject,
       text,
