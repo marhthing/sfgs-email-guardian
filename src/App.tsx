@@ -26,40 +26,8 @@ import Birthday from "./pages/Birthday";
 
 const queryClient = new QueryClient();
 
-const PrivateRoute = ({ element }: { element: JSX.Element }) => {
-  const { user, isLoading } = useAuth();
-  const location = useLocation();
-  if (isLoading) return null; // Let AppInner handle the splash
-  if (!user) return <Navigate to="/auth" state={{ from: location }} replace />;
-  return element;
-};
-
 const AppInner = () => {
-  const { isLoading, user } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Save current path to localStorage on route change
-  useEffect(() => {
-    if (location.pathname !== "/auth") {
-      localStorage.setItem("lastPath", location.pathname);
-    }
-  }, [location.pathname]);
-
-  // On mount, restore last path if on root
-  useEffect(() => {
-    if (location.pathname === "/") {
-      const lastPath = localStorage.getItem("lastPath");
-      if (lastPath && lastPath !== "/" && lastPath !== "/auth") {
-        navigate(lastPath, { replace: true });
-      } else if (user) {
-        navigate("/dashboard", { replace: true });
-      } else {
-        navigate("/auth", { replace: true });
-      }
-    }
-  }, [location.pathname, navigate, user]);
-
+  const { isLoading } = useAuth();
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -78,37 +46,17 @@ const AppInner = () => {
       <Toaster />
       <Sonner />
       <Routes>
-        <Route
-          path="/auth"
-          element={user ? <Navigate to="/dashboard" replace /> : <Auth />}
-        />
-        <Route
-          path="/dashboard"
-          element={<PrivateRoute element={<Dashboard />} />}
-        />
-        <Route path="/upload" element={<PrivateRoute element={<Upload />} />} />
-        <Route path="/files" element={<PrivateRoute element={<Files />} />} />
-        <Route path="/queue" element={<PrivateRoute element={<Queue />} />} />
-        <Route
-          path="/students"
-          element={<PrivateRoute element={<Students />} />}
-        />
-        <Route
-          path="/birthdays"
-          element={<PrivateRoute element={<Birthday />} />}
-        />
-        <Route
-          path="/history/sent"
-          element={<PrivateRoute element={<SentHistory />} />}
-        />
-        <Route
-          path="/history/failed"
-          element={<PrivateRoute element={<FailedEmails />} />}
-        />
-        <Route
-          path="/settings"
-          element={<PrivateRoute element={<Settings />} />}
-        />
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/upload" element={<Upload />} />
+        <Route path="/files" element={<Files />} />
+        <Route path="/queue" element={<Queue />} />
+        <Route path="/students" element={<Students />} />
+        <Route path="/birthdays" element={<Birthday />} />
+        <Route path="/history/sent" element={<SentHistory />} />
+        <Route path="/history/failed" element={<FailedEmails />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TooltipProvider>
