@@ -125,7 +125,7 @@ export default function Queue() {
   const prioritized = pendingQueue.filter((item) => item.prioritized_at);
   const normal = pendingQueue.filter((item) => !item.prioritized_at);
 
-  // Filter queue by student name or matric number (order-insensitive) and type
+  // Filter queue by student name or student ID (order-insensitive) and type
   const filterWords = filter.toLowerCase().split(/\s+/).filter(Boolean);
   const filteredPrioritized = prioritized.filter((item) => {
     const name = item.students?.student_name?.toLowerCase() || "";
@@ -152,7 +152,7 @@ export default function Queue() {
       {/* Filter controls - always visible, not inside Card on mobile */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
-          placeholder="Filter by name or matric number..."
+          placeholder="Filter by name or Student ID..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="max-w-xs"
@@ -225,7 +225,7 @@ export default function Queue() {
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-2 px-0 pb-0">
                   <div className="text-xs">
-                    <span className="font-semibold">Matric:</span>{" "}
+                    <span className="font-semibold">Student ID:</span>{" "}
                     {item.matric_number}
                   </div>
                   <div className="text-xs">
@@ -318,7 +318,7 @@ export default function Queue() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Student</TableHead>
-                      <TableHead>Matric</TableHead>
+                      <TableHead>Student ID</TableHead>
                       <TableHead>Recipient</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Status</TableHead>
@@ -403,7 +403,7 @@ export default function Queue() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student</TableHead>
-                  <TableHead>Matric</TableHead>
+                  <TableHead>Student ID</TableHead>
                   <TableHead>Recipient</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>

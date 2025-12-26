@@ -94,7 +94,7 @@ export default function BirthdayPage() {
     >
       <div className="mb-4 flex items-center gap-2">
         <Input
-          placeholder="Filter by name or matric number..."
+          placeholder="Filter by name or Student ID..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="max-w-xs"
@@ -145,7 +145,7 @@ export default function BirthdayPage() {
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Matric: {student.matric_number}
+                      Student ID: {student.matric_number}
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">

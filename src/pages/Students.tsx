@@ -267,14 +267,14 @@ export default function Students() {
     setIsSending(false);
   };
 
-  // Combined filter for name or matric number (order-insensitive for name, ignores spaces for matric)
+  // Combined filter for name or student ID (order-insensitive for name, ignores spaces for student ID)
   const filteredStudents = students.filter((student) => {
     const name = student.student_name.toLowerCase();
-    const matric = student.matric_number.replace(/\s+/g, "").toLowerCase();
+    const studentId = student.matric_number.replace(/\s+/g, "").toLowerCase();
     const searchValue = search.toLowerCase();
     if (!searchValue) return true;
-    // Matric: ignore spaces
-    if (matric.includes(searchValue.replace(/\s+/g, ""))) return true;
+    // Student ID: ignore spaces
+    if (studentId.includes(searchValue.replace(/\s+/g, ""))) return true;
     // Name: order-insensitive word match
     const words = searchValue.split(/\s+/).filter(Boolean);
     return words.every((word) => name.includes(word));
@@ -284,15 +284,22 @@ export default function Students() {
     <AdminLayout title="Students" description="Manage student records">
       <ConfirmDialog
         open={showDeleteDialog}
-        title={studentToDelete ? `Delete student ${studentToDelete.student_name}?` : "Delete student?"}
+        title={
+          studentToDelete
+            ? `Delete student ${studentToDelete.student_name}?`
+            : "Delete student?"
+        }
         description="This action cannot be undone. The student and all related data will be permanently deleted."
         onConfirm={confirmDelete}
-        onCancel={() => { setShowDeleteDialog(false); setStudentToDelete(null); }}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setStudentToDelete(null);
+        }}
       />
       {/* Filter/search input always visible */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
-          placeholder="Filter by name or matric number..."
+          placeholder="Filter by name or Student ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
@@ -331,7 +338,7 @@ export default function Students() {
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-2 px-0 pb-0">
                   <div className="text-xs">
-                    <span className="font-semibold">Matric:</span>{" "}
+                    <span className="font-semibold">Student ID:</span>{" "}
                     {student.matric_number}
                   </div>
                   <div className="text-xs">
@@ -389,7 +396,7 @@ export default function Students() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Matric</TableHead>
+                  <TableHead>Student ID</TableHead>
                   <TableHead>DOB</TableHead>
                   <TableHead>Parent Email 1</TableHead>
                   <TableHead>Parent Email 2</TableHead>
@@ -473,7 +480,7 @@ export default function Students() {
               />
             </div>
             <div>
-              <Label>Matric Number</Label>
+              <Label>Student ID</Label>
               <Input
                 name="matric_number"
                 value={form.matric_number || ""}

@@ -58,7 +58,7 @@ export default function SentHistory() {
         <CardContent>
           <div className="mb-4 flex items-center gap-2">
             <Input
-              placeholder="Filter by name or matric number..."
+              placeholder="Filter by name or Student ID..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="max-w-xs"

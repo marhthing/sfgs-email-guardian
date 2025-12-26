@@ -120,7 +120,7 @@ export default function Files() {
         <CardContent className="px-2 pt-0 pb-2">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <Input
-              placeholder="Filter by name or matric number..."
+              placeholder="Filter by name or Student ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-xs"
@@ -162,7 +162,7 @@ export default function Files() {
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col gap-2 px-0 pb-0">
                     <div className="text-xs">
-                      <span className="font-semibold">Matric:</span>{" "}
+                      <span className="font-semibold">Student ID:</span>{" "}
                       {file.matric_number_parsed}
                     </div>
                     <div className="text-xs">
@@ -207,7 +207,7 @@ export default function Files() {
                 <TableRow>
                   <TableHead className="whitespace-nowrap">File Name</TableHead>
                   <TableHead className="whitespace-nowrap">
-                    Parsed Matric
+                    Student ID
                   </TableHead>
                   <TableHead className="whitespace-nowrap">Student</TableHead>
                   <TableHead className="whitespace-nowrap">Status</TableHead>
