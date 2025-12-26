@@ -3,10 +3,12 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   ReactNode,
 } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +27,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const timerRef = useRef<number | null>(null);
+
+  // Idle timeout in milliseconds (10 minutes)
+  const IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+
+  const clearIdleTimer = () => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const startIdleTimer = () => {
+    clearIdleTimer();
+    timerRef.current = window.setTimeout(async () => {
+      // Auto sign out on idle
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      toast({ title: "Signed out due to inactivity" });
+    }, IDLE_TIMEOUT_MS);
+  };
+
+  const resetIdleTimer = () => {
+    if (!user) return;
+    startIdleTimer();
+  };
 
   const checkAdminRole = async (userId: string) => {
     try {
@@ -58,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       subscription.unsubscribe();
+      clearIdleTimer();
     };
   }, []);
 
@@ -72,6 +104,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAdmin(false);
       setIsLoading(false);
     }
+    // start/stop idle timer and activity listeners
+    const activityEvents = [
+      "mousemove",
+      "mousedown",
+      "keydown",
+      "touchstart",
+      "click",
+    ] as const;
+    const handleActivity = () => resetIdleTimer();
+
+    if (user) {
+      // start timer and attach listeners
+      startIdleTimer();
+      activityEvents.forEach((ev) =>
+        window.addEventListener(ev, handleActivity)
+      );
+    } else {
+      // ensure timer/listeners removed when no user
+      clearIdleTimer();
+      activityEvents.forEach((ev) =>
+        window.removeEventListener(ev, handleActivity)
+      );
+    }
+
+    return () => {
+      clearIdleTimer();
+      activityEvents.forEach((ev) =>
+        window.removeEventListener(ev, handleActivity)
+      );
+    };
   }, [user]);
 
   const signIn = async (email: string, password: string) => {
@@ -97,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
+    clearIdleTimer();
   };
 
   return (
