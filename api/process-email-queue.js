@@ -107,7 +107,7 @@ export default async function handler(req, res) {
   const birthdayEmails = pendingEmails.filter(e => e.email_type === 'birthday');
   let nonBirthdayEmails = pendingEmails.filter(e => e.email_type !== 'birthday');
 
-  // If cron is disabled, skip non-birthday emails
+  // If cron is disabled, skip non-birthday emails (but keep birthday emails in the queue and process them)
   if (settings && settings.cron_enabled === false) {
     if (nonBirthdayEmails.length > 0) {
       await supabase.from('cron_log').insert({
