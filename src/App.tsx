@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import Students from "./pages/Students";
 import Birthday from "./pages/Birthday";
 import StudentPromotion from "./pages/StudentPromotion";
+import ArchivedStudents from "./pages/ArchivedStudents";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const AppInner = () => {
         <Route path="/history/failed" element={<FailedEmails />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/student-promotion" element={<StudentPromotion />} />
+        <Route path="/archived-students" element={<ArchivedStudents />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TooltipProvider>

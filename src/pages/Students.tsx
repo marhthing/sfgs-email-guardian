@@ -32,6 +32,7 @@ interface Student {
   parent_email_1: string | null;
   parent_email_2: string | null;
   class: string; // Add class field
+  archived?: boolean; // Add archived field
 }
 
 const CLASS_OPTIONS = [
@@ -50,7 +51,9 @@ export default function Students() {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [form, setForm] = useState<Partial<Student>>({});
+  const [form, setForm] = useState<Partial<Student & { archived?: boolean }>>(
+    {}
+  );
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailForm, setEmailForm] = useState({
     to: "",
@@ -66,12 +69,15 @@ export default function Students() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [classFilter, setClassFilter] = useState("");
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [actionStudent, setActionStudent] = useState<Student | null>(null);
 
   const fetchStudents = async () => {
     setIsLoading(true);
     const { data } = await supabase
       .from("students")
       .select("*")
+      .eq("archived", false) // Only fetch non-archived students
       .order("created_at", { ascending: false });
     // Ensure class is always present
     setStudents((data || []).map((s: any) => ({ ...s, class: s.class || "" })));
@@ -140,6 +146,7 @@ export default function Students() {
         parent_email_1: form.parent_email_1 || null,
         parent_email_2: form.parent_email_2 || null,
         class: form.class!,
+        archived: false,
       });
       if (error) {
         toast({ title: "Failed to add student", variant: "destructive" });
@@ -287,6 +294,30 @@ export default function Students() {
     setIsSending(false);
   };
 
+  // Archive logic
+  const handleArchive = async (student: Student) => {
+    const { error } = await supabase
+      .from("students")
+      .update({ archived: true })
+      .eq("id", student.id);
+    if (error) {
+      toast({ title: "Failed to archive student", variant: "destructive" });
+    } else {
+      toast({ title: "Student archived" });
+      fetchStudents();
+    }
+  };
+
+  // Open action modal
+  const openActionModal = (student: Student) => {
+    setActionStudent(student);
+    setShowActionModal(true);
+  };
+  const closeActionModal = () => {
+    setShowActionModal(false);
+    setActionStudent(null);
+  };
+
   // Combined filter for name, student ID, and class
   const filteredStudents = students.filter((student) => {
     const name = student.student_name.toLowerCase();
@@ -396,23 +427,9 @@ export default function Students() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => openEditModal(student)}
+                    onClick={() => openActionModal(student)}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(student)}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => openEmailModal(student)}
-                  >
-                    Send Email
+                    Action
                   </Button>
                 </div>
               </Card>
@@ -475,23 +492,9 @@ export default function Students() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openEditModal(student)}
+                          onClick={() => openActionModal(student)}
                         >
-                          Edit
-                        </Button>{" "}
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(student)}
-                        >
-                          Delete
-                        </Button>{" "}
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => openEmailModal(student)}
-                        >
-                          Send Email
+                          Action
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -628,6 +631,56 @@ export default function Students() {
               onClick={() => setShowEmailModal(false)}
               disabled={isSending}
             >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showActionModal} onOpenChange={setShowActionModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Actions for {actionStudent?.student_name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => {
+                closeActionModal();
+                openEditModal(actionStudent!);
+              }}
+              variant="outline"
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => {
+                closeActionModal();
+                handleDelete(actionStudent!);
+              }}
+              variant="destructive"
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => {
+                closeActionModal();
+                openEmailModal(actionStudent!);
+              }}
+              variant="secondary"
+            >
+              Send Email
+            </Button>
+            <Button
+              onClick={() => {
+                closeActionModal();
+                handleArchive(actionStudent!);
+              }}
+              variant="ghost"
+            >
+              Archive
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeActionModal}>
               Cancel
             </Button>
           </DialogFooter>

@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Cake,
   ArrowUpRight,
+  Archive, // Add Archive icon
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +34,7 @@ const mainNavItems = [
   { title: "Uploaded Files", url: "/files", icon: FileText },
   { title: "Email Queue", url: "/queue", icon: Mail },
   { title: "Students", url: "/students", icon: GraduationCap },
+  { title: "Archived Students", url: "/archived-students", icon: Archive }, // Use Archive icon
   { title: "Student Promotion", url: "/student-promotion", icon: ArrowUpRight },
   { title: "Birthdays", url: "/birthdays", icon: Cake },
 ];
