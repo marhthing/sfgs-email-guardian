@@ -140,6 +140,24 @@ export default function Settings() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Google Sheets Sync Section - now at the very top */}
+          <div className="pb-8 mb-8 border-b">
+            <Label>Sync Students from Google Sheets</Label>
+            <div className="flex gap-2 mt-2">
+              <Button onClick={handleSyncStudents} disabled={syncLoading}>
+                {syncLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                Sync
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Imports or updates all students from the configured Google Sheet.
+            </p>
+          </div>
+          {/* System Settings Section follows */}
           <div className="space-y-2">
             <Label>Sender Email (Read-only)</Label>
             <Input value={settings.sender_email} disabled />
@@ -231,23 +249,6 @@ export default function Settings() {
             </div>
             <p className="text-sm text-muted-foreground mt-1">
               Sends a test email to the address above.
-            </p>
-          </div>
-          {/* Google Sheets Sync Section */}
-          <div className="pt-8 mt-8 border-t">
-            <Label>Sync Students from Google Sheets</Label>
-            <div className="flex gap-2 mt-2">
-              <Button onClick={handleSyncStudents} disabled={syncLoading}>
-                {syncLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                Sync
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Imports or updates all students from the configured Google Sheet.
             </p>
           </div>
         </CardContent>

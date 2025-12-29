@@ -66,7 +66,14 @@ export default async function handler(req, res) {
     });
     const rows = sheetRes.data.values;
     if (!rows || rows.length < 2) {
-      return res.status(400).json({ error: "No data found in sheet" });
+      // No data found, but this is not a client error
+      await supabase.from("student_sync_history").insert({
+        admin_email: adminEmail || "system",
+        status: "success",
+        count: 0,
+        message: "No data found in sheet."
+      });
+      return res.status(200).json({ success: true, count: 0, message: "No data found in sheet." });
     }
 
     const headers = rows[0].map((h) => h.trim().toLowerCase());
