@@ -1,8 +1,55 @@
 // birthdayTemplate.js
 // Export a function that returns the HTML for the birthday certificate
 
+// Utility to obfuscate celebration words
+function obfuscateWord(word) {
+  return word.split("").join("&#8203;"); // zero-width space between each letter
+}
+
 export default function birthdayTemplate({ studentName }) {
-  return `
+  // List of words to obfuscate
+  const wordsToObfuscate = [
+    "birthday",
+    "Birthday",
+    "BIRTHDAY",
+    "celebrating",
+    "Celebrating",
+    "CELEBRATING",
+    "celebration",
+    "Celebration",
+    "CELEBRATION",
+    "congratulations",
+    "Congratulations",
+    "CONGRATULATIONS",
+    "happy",
+    "Happy",
+    "HAPPY",
+    "wonderful",
+    "Wonderful",
+    "WONDERFUL",
+    "joy",
+    "Joy",
+    "JOY",
+    "happiness",
+    "Happiness",
+    "HAPPINESS",
+    "growth",
+    "Growth",
+    "GROWTH",
+    "learning",
+    "Learning",
+    "LEARNING",
+    "cherished",
+    "Cherished",
+    "CHERISHED",
+    "moments",
+    "Moments",
+    "MOMENTS",
+    "Warm regards",
+    "warm regards",
+    "WARM REGARDS",
+  ];
+  let html = `
     <div style="background: #f5f5f5; font-family: 'Georgia', 'Times New Roman', serif; padding: 20px 15px; margin: 0;">
       <table role="presentation" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 700px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 8px 32px rgba(0,0,0,0.12);">
         
@@ -135,4 +182,10 @@ export default function birthdayTemplate({ studentName }) {
       </table>
     </div>
   `;
+  // Obfuscate all celebration words
+  for (const word of wordsToObfuscate) {
+    const re = new RegExp(word, "g");
+    html = html.replace(re, obfuscateWord(word));
+  }
+  return html;
 }
