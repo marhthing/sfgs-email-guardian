@@ -11,6 +11,7 @@ import {
   Cake,
   ArrowUpRight,
   Archive, // Add Archive icon
+  RotateCcw,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +43,7 @@ const mainNavItems = [
 const historyNavItems = [
   { title: "Sent History", url: "/history/sent", icon: CheckCircle },
   { title: "Failed Emails", url: "/history/failed", icon: XCircle },
+  { title: "Cancelled Emails", url: "/CancelledEmails", icon: XCircle },
 ];
 
 const settingsNavItems = [

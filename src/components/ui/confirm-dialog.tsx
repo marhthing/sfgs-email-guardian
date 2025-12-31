@@ -13,6 +13,7 @@ interface ConfirmDialogProps {
   description?: string;
   onConfirm: () => void | Promise<void>;
   onCancel: () => void;
+  confirmLabel?: string; // Add this prop
 }
 
 export default function ConfirmDialog({
@@ -21,6 +22,7 @@ export default function ConfirmDialog({
   description,
   onConfirm,
   onCancel,
+  confirmLabel = "Delete", // Default to Delete
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onCancel}>
@@ -35,7 +37,7 @@ export default function ConfirmDialog({
         )}
         <DialogFooter>
           <Button variant="destructive" onClick={onConfirm}>
-            Delete
+            {confirmLabel}
           </Button>
           <Button variant="outline" onClick={onCancel}>
             Cancel

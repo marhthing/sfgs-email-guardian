@@ -28,7 +28,7 @@ const CLASS_OPTIONS = [
   "SSS3B",
 ];
 
-export default function FailedEmails() {
+export default function CancelledEmails() {
   const [emails, setEmails] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -39,7 +39,7 @@ export default function FailedEmails() {
     const { data } = await supabase
       .from("email_queue")
       .select("*, students(student_name, class), failed_at")
-      .eq("status", "failed")
+      .eq("status", "cancelled")
       .order("failed_at", { ascending: false })
       .order("created_at", { ascending: false });
     setEmails(data || []);
@@ -64,15 +64,6 @@ export default function FailedEmails() {
     fetch();
   };
 
-  const handleCancel = async (id: string) => {
-    await supabase
-      .from("email_queue")
-      .update({ status: "cancelled", failed_at: new Date().toISOString() })
-      .eq("id", id);
-    toast({ title: "Email cancelled" });
-    fetch();
-  };
-
   const filteredEmails = emails.filter((item) => {
     if (classFilter && item.students?.class !== classFilter) return false;
     return (
@@ -85,14 +76,14 @@ export default function FailedEmails() {
 
   return (
     <AdminLayout
-      title="Failed Emails"
-      description="View and retry failed email deliveries"
+      title="Cancelled Emails"
+      description="View all cancelled emails"
     >
       <Card className="animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <XCircle className="h-5 w-5 text-destructive" />
-            Failed Emails
+            <XCircle className="h-5 w-5 text-muted-foreground" />
+            Cancelled Emails
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -117,75 +108,7 @@ export default function FailedEmails() {
               ))}
             </select>
           </div>
-          {/* Card grid for mobile, table for desktop */}
-          <div className="block md:hidden">
-            {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : filteredEmails.length === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                No failed emails
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-3">
-                {filteredEmails.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-lg border bg-card p-3 flex flex-col gap-2 shadow-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-destructive text-white">
-                        Failed
-                      </Badge>
-                      <span
-                        className="font-bold text-sm truncate"
-                        title={item.students?.student_name || "-"}
-                      >
-                        {item.students?.student_name || "-"}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground break-all">
-                      <span className="font-semibold">Recipient:</span>{" "}
-                      {item.recipient_email}
-                    </div>
-                    <div className="text-xs">
-                      <Badge variant="outline">{item.email_type}</Badge>
-                    </div>
-                    <div className="text-xs">
-                      <span className="font-semibold">Class:</span>{" "}
-                      {item.students?.class || "-"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-semibold">Failed At:</span>{" "}
-                      {item.failed_at || item.created_at
-                        ? format(
-                            new Date(item.failed_at || item.created_at),
-                            "PPpp"
-                          )
-                        : "-"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleRetry(item.id)}
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleCancel(item.id)}
-                        style={{ marginLeft: 8 }}
-                      >
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="w-full overflow-x-auto hidden md:block">
+          <div className="w-full overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -193,7 +116,7 @@ export default function FailedEmails() {
                   <TableHead>Recipient</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Class</TableHead>
-                  <TableHead>Failed At</TableHead>
+                  <TableHead>Cancelled At</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -210,15 +133,15 @@ export default function FailedEmails() {
                       colSpan={6}
                       className="text-center text-muted-foreground"
                     >
-                      No failed emails
+                      No cancelled emails
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredEmails.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
-                        <Badge className="bg-destructive text-white mr-2">
-                          Failed
+                        <Badge className="bg-muted text-white mr-2">
+                          Cancelled
                         </Badge>
                         {item.students?.student_name || "-"}
                       </TableCell>
@@ -242,14 +165,6 @@ export default function FailedEmails() {
                           onClick={() => handleRetry(item.id)}
                         >
                           <RotateCcw className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleCancel(item.id)}
-                          style={{ marginLeft: 8 }}
-                        >
-                          <XCircle className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>

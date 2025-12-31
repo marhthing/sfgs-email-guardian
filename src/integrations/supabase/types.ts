@@ -77,7 +77,9 @@ export type Database = {
           message: string | null
           attachments: Json | null
           queued_at: string | null
-          failed_at: string | null // <-- add this line
+          failed_at: string | null
+          prioritized_at: string | null // <-- add this line
+          cron_enabled: boolean | null // <-- add this line
         }
         Insert: {
           created_at?: string
@@ -94,7 +96,9 @@ export type Database = {
           message?: string | null
           attachments?: Json | null
           queued_at?: string | null
-          failed_at?: string | null // <-- add this line
+          failed_at?: string | null
+          prioritized_at?: string | null // <-- add this line
+          cron_enabled?: boolean | null // <-- add this line
         }
         Update: {
           created_at?: string
@@ -111,7 +115,9 @@ export type Database = {
           message?: string | null
           attachments?: Json | null
           queued_at?: string | null
-          failed_at?: string | null // <-- add this line
+          failed_at?: string | null
+          prioritized_at?: string | null // <-- add this line
+          cron_enabled?: boolean | null // <-- add this line
         }
         Relationships: [
           {
@@ -192,6 +198,7 @@ export type Database = {
           id: string
           sender_email: string
           updated_at: string
+          cron_enabled: boolean | null // <-- add this line
         }
         Insert: {
           admin_password?: string
@@ -200,6 +207,7 @@ export type Database = {
           id?: string
           sender_email?: string
           updated_at?: string
+          cron_enabled?: boolean | null // <-- add this line
         }
         Update: {
           admin_password?: string
@@ -208,6 +216,7 @@ export type Database = {
           id?: string
           sender_email?: string
           updated_at?: string
+          cron_enabled?: boolean | null // <-- add this line
         }
         Relationships: []
       }
@@ -288,7 +297,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      email_status: "pending" | "processing" | "sent" | "failed"
+      email_status: "pending" | "processing" | "sent" | "failed" | "cancelled"
       email_type: "pdf" | "birthday"
       file_status: "matched" | "unmatched"
       log_type: "cron" | "email" | "upload"
@@ -420,7 +429,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      email_status: ["pending", "processing", "sent", "failed"],
+      email_status: ["pending", "processing", "sent", "failed", "cancelled"],
       email_type: ["pdf", "birthday"],
       file_status: ["matched", "unmatched"],
       log_type: ["cron", "email", "upload"],

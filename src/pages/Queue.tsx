@@ -76,7 +76,10 @@ export default function Queue() {
   };
 
   const handleCancel = async (id: string) => {
-    await supabase.from("email_queue").delete().eq("id", id);
+    await supabase
+      .from("email_queue")
+      .update({ status: "cancelled", failed_at: new Date().toISOString() })
+      .eq("id", id);
     toast({ title: "Email cancelled" });
     fetchQueue();
   };
@@ -271,7 +274,7 @@ export default function Queue() {
                   </div>
                   <div className="text-xs">
                     <span className="font-semibold">Created:</span>{" "}
-                    {format(new Date(item.created_at), "PP")}
+                    {format(new Date(item.created_at), "PPpp")}
                   </div>
                   <div className="text-xs">
                     <span className="font-semibold">Class:</span>{" "}
@@ -379,7 +382,7 @@ export default function Queue() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(item.created_at), "PP")}
+                          {format(new Date(item.created_at), "PPpp")}
                         </TableCell>
                         <TableCell>{item.students?.class || "-"}</TableCell>
                         <TableCell>
@@ -482,7 +485,7 @@ export default function Queue() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(item.created_at), "PP")}
+                        {format(new Date(item.created_at), "PPpp")}
                       </TableCell>
                       <TableCell>{item.students?.class || "-"}</TableCell>
                       <TableCell>
@@ -538,9 +541,10 @@ export default function Queue() {
         title="Cancel Email?"
         description={
           emailToCancel
-            ? `Are you sure you want to cancel the email to '${emailToCancel.recipient_email}'? This action cannot be undone.`
+            ? `Are you sure you want to cancel the email to '${emailToCancel.recipient_email}'?`
             : ""
         }
+        confirmLabel="Cancel"
         onConfirm={async () => {
           if (emailToCancel) await handleCancel(emailToCancel.id);
           setConfirmOpen(false);
