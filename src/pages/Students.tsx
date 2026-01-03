@@ -94,7 +94,14 @@ export default function Students() {
       .eq("archived", false)
       .order("created_at", { ascending: false })
       .range(from, to);
-    setStudents((data || []).map((s: any) => ({ ...s, class: s.class || "" })));
+    setStudents(
+      (data || []).map(
+        (s: Omit<Student, "class"> & { class: string | null }) => ({
+          ...s,
+          class: s.class || "",
+        })
+      )
+    );
     setTotalCount(count || 0);
     setIsLoading(false);
   };
@@ -207,7 +214,7 @@ export default function Students() {
     setEmailForm({
       to,
       from: import.meta.env.VITE_SMTP_USER || "",
-      subject: `Message for ${student.student_name}` || "No subject",
+      subject: `SURE FOUNDATION MONTHLY FEEDBACK FOR ${student.student_name.toUpperCase()}`,
       message: "",
       attachments: [],
     });
@@ -229,7 +236,7 @@ export default function Students() {
 
   const handleSendEmail = async () => {
     setIsSending(true);
-    let attachmentPaths: string[] = [];
+    const attachmentPaths: string[] = [];
     // Upload attachments to Supabase Storage if any
     if (emailForm.attachments.length > 0) {
       for (const file of emailForm.attachments) {
@@ -314,7 +321,7 @@ export default function Students() {
   const handleArchive = async (student: Student) => {
     const { error } = await supabase
       .from("students")
-      .update({ archived: true as any })
+      .update({ archived: true })
       .eq("id", student.id);
     if (error) {
       toast({ title: "Failed to archive student", variant: "destructive" });
@@ -660,7 +667,7 @@ export default function Students() {
                 onChange={handleEmailFormChange}
               />
             </div>
-            <div>
+            {/* <div>
               <Label>Message</Label>
               <Textarea
                 name="message"
@@ -668,10 +675,21 @@ export default function Students() {
                 onChange={handleEmailFormChange}
                 rows={5}
               />
-            </div>
+            </div> */}
             <div>
               <Label>Attachments</Label>
-              <Input type="file" multiple onChange={handleAttachmentChange} />
+              <Input
+                type="file"
+                multiple
+                onChange={handleAttachmentChange}
+                className="bg-gray-400 text-gray-500"
+              />
+              {emailForm.attachments.length > 0 && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  Selected files:{" "}
+                  {emailForm.attachments.map((f) => f.name).join(", ")}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter className="mt-4">
