@@ -80,20 +80,28 @@ export default function Students() {
   const pageSize = 15;
   const [totalCount, setTotalCount] = useState(0);
 
+  // Remove students filtering in JS, move filtering to Supabase query
   const fetchStudents = async () => {
     setIsLoading(true);
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
-    // Use explicit column list to avoid deep type instantiation
-    const { data, count } = await supabase
+    let query = supabase
       .from("students")
       .select(
         "id, student_name, matric_number, date_of_birth, parent_email_1, parent_email_2, class, archived",
         { count: "exact" }
       )
-      .eq("archived", false)
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .eq("archived", false);
+    if (classFilter) {
+      query = query.eq("class", classFilter);
+    }
+    if (search.trim()) {
+      // Search by name or matric_number (case-insensitive, partial match)
+      const searchValue = search.trim();
+      query = query.or(
+        `student_name.ilike.%${searchValue}%,matric_number.ilike.%${searchValue}%`
+      );
+    }
+    query = query.order("created_at", { ascending: false });
+    const { data, count } = await query;
     setStudents(
       (data || []).map(
         (s: Omit<Student, "class"> & { class: string | null }) => ({
@@ -104,12 +112,19 @@ export default function Students() {
     );
     setTotalCount(count || 0);
     setIsLoading(false);
+    setPage(1); // Reset to first page on new filter
   };
 
   useEffect(() => {
     fetchStudents();
     // eslint-disable-next-line
-  }, [page]);
+  }, [search, classFilter]);
+
+  // Paginate filtered students in render
+  const paginatedStudents = students.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
   const openAddModal = () => {
     setEditingStudent(null);
@@ -341,20 +356,6 @@ export default function Students() {
     setActionStudent(null);
   };
 
-  // Combined filter for name, student ID, and class
-  const filteredStudents = students.filter((student) => {
-    const name = student.student_name.toLowerCase();
-    const studentId = student.matric_number.replace(/\s+/g, "").toLowerCase();
-    const searchValue = search.toLowerCase();
-    if (classFilter && student.class !== classFilter) return false;
-    if (!searchValue) return true;
-    // Student ID: ignore spaces
-    if (studentId.includes(searchValue.replace(/\s+/g, ""))) return true;
-    // Name: order-insensitive word match
-    const words = searchValue.split(/\s+/).filter(Boolean);
-    return words.every((word) => name.includes(word));
-  });
-
   return (
     <AdminLayout title="Students" description="Manage student records">
       <ConfirmDialog
@@ -404,12 +405,12 @@ export default function Students() {
             <div className="col-span-full text-center py-8 text-muted-foreground">
               Loading...
             </div>
-          ) : filteredStudents.length === 0 ? (
+          ) : paginatedStudents.length === 0 ? (
             <div className="col-span-full text-center py-8 text-muted-foreground">
               No students found
             </div>
           ) : (
-            filteredStudents.map((student) => (
+            paginatedStudents.map((student) => (
               <Card
                 key={student.id}
                 className="flex flex-col h-full border p-3 shadow-sm"
@@ -459,6 +460,39 @@ export default function Students() {
             ))
           )}
         </div>
+        <div className="flex justify-center mt-4">
+          {totalCount > pageSize && (
+            <Pagination>
+              <PaginationPrevious
+                onClick={
+                  page === 1
+                    ? undefined
+                    : () => setPage((p) => Math.max(1, p - 1))
+                }
+                aria-disabled={page === 1}
+                tabIndex={page === 1 ? -1 : 0}
+                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+              <span className="px-4 py-2 text-sm flex items-center">
+                Page {page} of {Math.max(1, Math.ceil(totalCount / pageSize))}
+              </span>
+              <PaginationNext
+                onClick={
+                  page * pageSize >= totalCount
+                    ? undefined
+                    : () => setPage((p) => p + 1)
+                }
+                aria-disabled={page * pageSize >= totalCount}
+                tabIndex={page * pageSize >= totalCount ? -1 : 0}
+                className={
+                  page * pageSize >= totalCount
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </Pagination>
+          )}
+        </div>
       </div>
       {/* Table for md+ screens only, inside Card */}
       <div className="hidden md:block">
@@ -489,7 +523,7 @@ export default function Students() {
                       Loading...
                     </TableCell>
                   </TableRow>
-                ) : students.length === 0 ? (
+                ) : paginatedStudents.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={7}
@@ -499,7 +533,7 @@ export default function Students() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredStudents.map((student) => (
+                  paginatedStudents.map((student) => (
                     <TableRow key={student.id}>
                       <TableCell className="font-bold">
                         {student.student_name}
@@ -524,43 +558,43 @@ export default function Students() {
                   ))
                 )}
               </TableBody>
+              <div className="flex justify-center mt-4">
+                {totalCount > pageSize && (
+                  <Pagination>
+                    <PaginationPrevious
+                      onClick={
+                        page === 1
+                          ? undefined
+                          : () => setPage((p) => Math.max(1, p - 1))
+                      }
+                      aria-disabled={page === 1}
+                      tabIndex={page === 1 ? -1 : 0}
+                      className={
+                        page === 1 ? "pointer-events-none opacity-50" : ""
+                      }
+                    />
+                    <span className="px-4 py-2 text-sm flex items-center">
+                      Page {page} of{" "}
+                      {Math.max(1, Math.ceil(totalCount / pageSize))}
+                    </span>
+                    <PaginationNext
+                      onClick={
+                        page * pageSize >= totalCount
+                          ? undefined
+                          : () => setPage((p) => p + 1)
+                      }
+                      aria-disabled={page * pageSize >= totalCount}
+                      tabIndex={page * pageSize >= totalCount ? -1 : 0}
+                      className={
+                        page * pageSize >= totalCount
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </Pagination>
+                )}
+              </div>
             </Table>
-            <div className="flex justify-center mt-4">
-              {totalCount > pageSize && (
-                <Pagination>
-                  <PaginationPrevious
-                    onClick={
-                      page === 1
-                        ? undefined
-                        : () => setPage((p) => Math.max(1, p - 1))
-                    }
-                    aria-disabled={page === 1}
-                    tabIndex={page === 1 ? -1 : 0}
-                    className={
-                      page === 1 ? "pointer-events-none opacity-50" : ""
-                    }
-                  />
-                  <span className="px-4 py-2 text-sm flex items-center">
-                    Page {page} of{" "}
-                    {Math.max(1, Math.ceil(totalCount / pageSize))}
-                  </span>
-                  <PaginationNext
-                    onClick={
-                      page * pageSize >= totalCount
-                        ? undefined
-                        : () => setPage((p) => p + 1)
-                    }
-                    aria-disabled={page * pageSize >= totalCount}
-                    tabIndex={page * pageSize >= totalCount ? -1 : 0}
-                    className={
-                      page * pageSize >= totalCount
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </Pagination>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -692,15 +726,11 @@ export default function Students() {
               )}
             </div>
           </div>
-          <DialogFooter className="mt-4">
+          <DialogFooter>
             <Button onClick={handleSendEmail} disabled={isSending}>
-              {isSending ? "Sending..." : "Send"}
+              {isSending ? "Sending..." : "Send Email"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowEmailModal(false)}
-              disabled={isSending}
-            >
+            <Button variant="outline" onClick={() => setShowEmailModal(false)}>
               Cancel
             </Button>
           </DialogFooter>
@@ -709,7 +739,7 @@ export default function Students() {
       <Dialog open={showActionModal} onOpenChange={setShowActionModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Actions for {actionStudent?.student_name}</DialogTitle>
+            <DialogTitle>Action</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
             <Button
